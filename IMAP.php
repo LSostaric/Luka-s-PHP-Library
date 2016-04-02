@@ -38,7 +38,7 @@
 *
 */
 
-class imap {
+class IMAP {
 
 	private $server;
 	private $port;
@@ -47,17 +47,17 @@ class imap {
 	private $mailbox;
 	private $flags;
 	private $options;
-	private $maximum_connection_attempts;
+	private $maximumConnectionAttempts;
 	private $parameters;
 	private $connection;
-	private $mailbox_string;
-	private $server_part;
+	private $mailboxString;
+	private $serverPart;
 	private static $debug = NULL;
 
 	public function __construct($host, $username,
 	$password, $mailbox = "",
 	$port = "", $flags = "", $options = 0,
-	$connection_attempts = 0, $parameters = array()) {
+	$connectionAttempts = 0, $parameters = array()) {
 
 		if(self::$debug === NULL) {
 
@@ -84,18 +84,18 @@ class imap {
 		$this->mailbox = $mailbox;
 		$this->flags = $flags;
 		$this->options = $options;
-		$this->maximum_connection_attempts = $connection_attempts;
+		$this->maximumConnectionAttempts = $connectionAttempts;
 		$this->parameters = $parameters;
 
-		$this->mailbox_string = sprintf("{%s%s%s}%s", $this->server,
+		$this->mailboxString = sprintf("{%s%s%s}%s", $this->server,
 		$this->port, $this->flags, $this->mailbox);
 
-		$this->server_part = sprintf("{%s%s%s}", $this->server,
+		$this->serverPart = sprintf("{%s%s%s}", $this->server,
 		$this->port, $this->flags);
 
-		$this->connection = imap_open($this->mailbox_string, $this->username,
+		$this->connection = imap_open($this->mailboxString, $this->username,
 		$this->password, $this->options,
-		$this->maximum_connection_attempts,
+		$this->maximumConnectionAttempts,
 		$this->parameters);
 
 		if(!$this->connection && self::$debug) {
@@ -112,10 +112,10 @@ class imap {
 
 	}
 
-	public function create_mailbox($mailbox_name) {
+	public function createMailbox($mailboxName) {
 
-		$mailbox_name = $this->mailbox_string . $mailbox_name;
-		$outcome = imap_createmailbox($this->connection, $mailbox_name);
+		$mailboxName = $this->mailboxString . $mailboxName;
+		$outcome = imap_createmailbox($this->connection, $mailboxName);
 
 		if(!$outcome && self::$debug) {
 
@@ -129,9 +129,9 @@ class imap {
 		}
 		elseif(!$outcome) {
 
-			$last_error_message = imap_last_error();
+			$lastErrorMessage = imap_last_error();
 
-			if($last_error_message == "Mailbox already exists") {
+			if($lastErrorMessage == "Mailbox already exists") {
 
 				return 1;
 
@@ -143,10 +143,10 @@ class imap {
 
 	}
 
-	public function get_mailboxes($pattern = "*") {
+	public function getMailboxes($pattern = "*") {
 
 		$mailboxes = imap_list($this->connection,
-		$this->mailbox_string, $pattern);
+		$this->mailboxString, $pattern);
 
 		if(is_array($mailboxes)) {
 
@@ -164,13 +164,13 @@ class imap {
 
 	}
 
-	public function rename_mailbox($old_mailbox_name, $new_mailbox_name) {
+	public function renameMailbox($oldMailboxName, $newMailboxName) {
 
 		$old = sprintf("{%s%s%s}%s", $this->server, $this->port, $this->flags,
-		$old_mailbox_name);
+		$oldMailboxName);
 
 		$new = sprintf("{%s%s%s}%s", $this->server, $this->port, $this->flags,
-		$new_mailbox_name);
+		$newMailboxName);
 
 		$outcome = imap_renamemailbox($this->connection, $old, $new);
 		if(!$outcome && self::$debug) {
@@ -187,9 +187,9 @@ class imap {
 		}
 		elseif(!$outcome) {
 
-			$last_error_message = imap_last_error();
+			$lastErrorMessage = imap_last_error();
 
-			if($last_error_message === "Mailbox already exists") {
+			if($lastErrorMessage === "Mailbox already exists") {
 
 				return 1;
 
@@ -201,12 +201,12 @@ class imap {
 
 	}
 
-	public function delete_mailbox($mailbox_name) {
+	public function deleteMailbox($mailboxName) {
 
-		$mailbox_name = sprintf("{%s%s%s}%s", $this->server, $this->port,
-		$this->flags, $mailbox_name);
+		$mailboxName = sprintf("{%s%s%s}%s", $this->server, $this->port,
+		$this->flags, $mailboxName);
 
-		$outcome = imap_deletemailbox($this->connection, $mailbox_name);
+		$outcome = imap_deletemailbox($this->connection, $mailboxName);
 
 		if(!$outcome && self::$debug) {
 
@@ -228,10 +228,10 @@ class imap {
 
 	}
 
-	public function set_acl($mailbox_name, $user_id, $permissions) {
+	public function setACL($mailboxName, $userID, $permissions) {
 
-		$outcome = imap_setacl($this->connection, $mailbox_name,
-		$user_id, $permissions);
+		$outcome = imap_setacl($this->connection, $mailboxName,
+		$userID, $permissions);
 
 		if(!$outcome && self::$debug) {
 
@@ -272,7 +272,7 @@ class imap {
 
 	}
 
-	public function toggle_debugging() {
+	public function toggleDebugging() {
 
 		if(!self::$debug) {
 
@@ -287,7 +287,7 @@ class imap {
 
 	}
 
-	public function print_debugging_status() {
+	public function printDebuggingStatus() {
 
 		if(self::$debug) {
 
@@ -302,7 +302,7 @@ class imap {
 
 	}
 
-	public function is_debugging_enabled() {
+	public function isDebuggingEnabled() {
 
 		if(self::$debug) {
 
@@ -317,7 +317,7 @@ class imap {
 
 	}
 
-	public function turn_on_debugging() {
+	public function turnOnDebugging() {
 
 		if(!self::$debug) {
 
@@ -335,7 +335,7 @@ class imap {
 
 	}
 
-	public function turn_off_debugging() {
+	public function turnOffDebugging() {
 
 		if(!self::$debug) {
 

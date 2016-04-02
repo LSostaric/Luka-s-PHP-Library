@@ -38,9 +38,7 @@
 *
 */
 
-class mysql extends mysqli {
-
-  private $current_charset;
+class MySQL extends mysqli {
 
   public function __get($property) {
 
@@ -98,9 +96,9 @@ class mysql extends mysqli {
 
   }
 
-  public function execute($sql_query, $values = NULL, $format = NULL) {
+  public function execute($sqlQuery, $values = NULL, $format = NULL) {
 
-    $statement = parent::prepare($sql_query);
+    $statement = parent::prepare($sqlQuery);
 
     if($statement === FALSE) {
 
@@ -111,7 +109,7 @@ class mysql extends mysqli {
 
     if($values != NULL && $format != NULL) {
 
-      $this->bind_params_array($statement, $values, $format);
+      $this->bindParamsArray($statement, $values, $format);
 
     }
 
@@ -128,7 +126,7 @@ class mysql extends mysqli {
 
     if($statement->result_metadata() !== FALSE) {
 
-      $bound_results = $this->bind_result_array($statement);
+      $boundResults = $this->bindResultArray($statement);
       $results = array();
       $i=0;
 
@@ -143,7 +141,7 @@ class mysql extends mysqli {
 
         }
 
-        foreach($bound_results as $name => $value) {
+        foreach($boundResults as $name => $value) {
 
           $row[$name] = $value;
 
@@ -166,7 +164,7 @@ class mysql extends mysqli {
 
   }
 
-  private function bind_result_array($statement) {
+  private function bindResultArray($statement) {
 
     $metadata = $statement->result_metadata();
     $columns = $metadata->fetch_fields();
@@ -208,7 +206,7 @@ class mysql extends mysqli {
 
   }
 
-  private function bind_params_array($statement, $bindings, $format) {
+  private function bindParamsArray($statement, $bindings, $format) {
 
     foreach($bindings as $key => $binding) {
 

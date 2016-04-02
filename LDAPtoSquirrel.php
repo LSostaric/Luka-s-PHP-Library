@@ -38,32 +38,32 @@
 *
 */
 
-class ldap_to_squirrel {
+class LDAPtoSquirrel {
 
-	private $ldap_connection;
-	private $postgres_connection;
+	private $ldapConnection;
+	private $postgresConnection;
 
-	public function __construct($ldap_host, $ldap_username,
-	$ldap_password, $postgres_connection_string) {
+	public function __construct($ldapHost, $ldapUsername,
+	$ldap_password, $postgresConnectionString) {
 
-		$this->ldap_connection = new ldap($ldap_host, $ldap_username,
+		$this->ldapConnection = new ldap($ldapHost, $ldapUsername,
 		$ldap_password);
 
-		$this->postgres_connection = new
-		postgresql($postgres_connection_string);
+		$this->postgresConnection = new
+		postgresql($postgresConnectionString);
 
 	}
 
-	public function copy_user_preferences($key_value_pairs, $username,
-	$username_column = "username", $prefkey_column = "prefkey",
-	$prefval_column = "prefval", $table_name = "userprefs") {
+	public function copyUserPreferences($keyValuePairs, $username, $baseDN,
+	$usernameColumn = "username", $prefkeyColumn = "prefkey",
+	$prefvalColumn = "prefval", $tableName = "userprefs",
+	$fullNameKey = "full_name", $emailKey = "email_address") {
 
 		$filter = sprintf("(uid=%s)", $username);
 
-		$user_record = $this->ldap_connection->get_records("dc=agrokor,dc=hr",
-		$filter);
+		$userRecord = $this->ldapConnection->getRecords($baseDN, $filter);
 
-		if($user_record["count"] > 1) {
+		if($userRecord["count"] > 1) {
 
 			debug_print_backtrace();
 			echo("LDAP search query doesn't return a unique record.");
@@ -71,25 +71,25 @@ class ldap_to_squirrel {
 
 		}
 
-		$full_name = $user_record[0]["cn"][0];
-		$email = $user_record[0]["mail"][0];
-		$key_value_pairs["full_name"] = $full_name;
-		$key_value_pairs["email_address"] = $email;
+		$fullName = $userRecord[0]["cn"][0];
+		$email = $userRecord[0]["mail"][0];
+		$keyValuePairs[$fullNameKey] = $fullName;
+		$keyValuePairs[$emailKey] = $email;
 
-		$count_query = sprintf("select count(*) as cnt from %s" .
-		" where %s = '%s'", $table_name, $username_column, $username);
+		$countQuery = sprintf("select count(*) as cnt from %s" .
+		" where %s = '%s'", $tableName, $usernameColumn, $username);
 
-		$result = $this->postgres_connection->execute($count_query, "count");
+		$result = $this->postgresConnection->execute($countQuery, "count");
 
 		if($result[0]["cnt"] == 0) {
 
 			$query = sprintf("insert into %s(%s, %s, %s) values('%s', $1, $2)",
-			$table_name, $username_column, $prefkey_column, $prefval_column,
+			$tableName, $usernameColumn, $prefkeyColumn, $prefvalColumn,
 			$username);
 
-			foreach($key_value_pairs as $key => $value) {
+			foreach($keyValuePairs as $key => $value) {
 
-				$this->postgres_connection->execute($query, "insert_preferences",
+				$this->postgresConnection->execute($query, "insertPreferences",
 				array($key, $value));
 
 			}
@@ -97,36 +97,36 @@ class ldap_to_squirrel {
 		}
 		else {
 
-			$key_value_pairs = array("full_name" => $key_value_pairs["full_name"],
-			"email_address" => $key_value_pairs["email_address"]);
+			$keyValuePairs = array($fullNameKey => $keyValuePairs[$fullNameKey],
+			$emailKey => $keyValuePairs[$emailKey]);
 
-			$count_query = sprintf("select count(*) as cnt from %s where %s = '%s'" .
-			" and %s = $1", $table_name, $username_column, $username,
-			$prefkey_column);
+			$countQuery = sprintf("select count(*) as cnt from %s where %s = '%s'" .
+			" and %s = $1", $tableName, $usernameColumn, $username,
+			$prefkeyColumn);
 
-			foreach($key_value_pairs as $key => $value) {
+			foreach($keyValuePairs as $key => $value) {
 
-				$count = $this->postgres_connection->execute($count_query, "key_count",
+				$count = $this->postgresConnection->execute($countQuery, "keyCount",
 				array($key));
 
 				if($count[0]["cnt"] == 0) {
 
-					$insert_query = sprintf("insert into %s(%s, %s, %s)" .
-					" values(%s, $2, $3)", $table_name, $username_column,
-					$prefkey_column, $prefval_column, $username);
+					$insertQuery = sprintf("insert into %s(%s, %s, %s)" .
+					" values(%s, $2, $3)", $tableName, $usernameColumn,
+					$prefkeyColumn, $prefvalColumn, $username);
 
-					$this->postgres_connection->execute($insert_query,
-					"insert_nonexistent_preference", array($key, $value));
+					$this->postgresConnection->execute($insertQuery,
+					"insertNonexistentPreference", array($key, $value));
 
 				}
 				else {
 
-					$update_query = sprintf("update %s set %s = $1, %s = $2" .
-					" where %s = '%s' and %s = $3", $table_name, $prefkey_column,
-					$prefval_column, $username_column, $username, $prefkey_column);
+					$updateQuery = sprintf("update %s set %s = $1, %s = $2" .
+					" where %s = '%s' and %s = $3", $tableName, $prefkeyColumn,
+					$prefvalColumn, $usernameColumn, $username, $prefkeyColumn);
 
-					$this->postgres_connection->execute($update_query,
-					"update_preferences", array($key, $value, $key));
+					$this->postgresConnection->execute($updateQuery,
+					"updatePreferences", array($key, $value, $key));
 
 				}
 
@@ -138,8 +138,8 @@ class ldap_to_squirrel {
 
 	public function disconnect() {
 
-		$this->ldap_connection->disconnect();
-		$this->postgres_connection->disconnect();
+		$this->ldapConnection->disconnect();
+		$this->postgresConnection->disconnect();
 
 	}
 

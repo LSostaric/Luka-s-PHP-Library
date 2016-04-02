@@ -38,12 +38,12 @@
 *
 */
 
-class ldap {
+class LDAP {
 
 	private $host;
 	private $port;
 	private $connection;
-	private $constructor_error_code = 0x00;
+	private $constructorErrorCode = 0x00;
 	private static $debug = NULL;
 
 	public function __construct($host, $dn = NULL,
@@ -79,18 +79,18 @@ class ldap {
 			echo("<br/>Could not bind to LDAP server. Details: " .
 			ldap_error($this->connection) . ".");
 
-			$this->constructor_error_code = ldap_errno($this->connection);
+			$this->constructorErrorCode = ldap_errno($this->connection);
 
 		}
 		elseif(!$outcome) {
 
-			$this->constructor_error_code = ldap_errno($this->connection);
+			$this->constructorErrorCode = ldap_errno($this->connection);
 
 		}
 
 	}
 
-	public function bind_as_another_user($dn = NULL, $password = NULL) {
+	public function bindAsAnotherUser($dn = NULL, $password = NULL) {
 
 		$outcome = @ldap_bind($this->connection, $dn, $password);
 
@@ -109,7 +109,7 @@ class ldap {
 		}
 	}
 
-	public function add_record($dn, $data) {
+	public function addRecord($dn, $data) {
 
 		$outcome = @ldap_add($this->connection, $dn, $data);
 		if(!$outcome && self::$debug) {
@@ -133,7 +133,7 @@ class ldap {
 
 	}
 
-	public function delete_record($dn) {
+	public function deleteRecord($dn) {
 
 		$outcome = @ldap_delete($this->connection, $dn);
 
@@ -160,22 +160,22 @@ class ldap {
 
 	}
 
-	public function delete_records($base_dn, $filter) {
+	public function deleteRecords($baseDN, $filter) {
 
-		$records = $this->get_records($base_dn, $filter, array("dn"));
+		$records = $this->getRecords($baseDN, $filter, array("dn"));
 
 		for($i = 0; $i < $records["count"]; $i++) {
 
-			$this->delete_record($records[$i]["dn"]);
+			$this->deleteRecord($records[$i]["dn"]);
 
 		}
 
 	}
 
-	public function move_record($dn, $new_rdn, $new_parent,
-	$delete_old_rdn = TRUE) {
+	public function moveRecord($dn, $newRDN, $newParent,
+	$deleteOldRDN = TRUE) {
 
-		$outcome = @ldap_rename($dn, $new_rdn, $new_parent, $delete_old_rdn);
+		$outcome = @ldap_rename($dn, $newRDN, $newParent, $deleteOldRDN);
 
 		if(!$outcome && self::$debug) {
 
@@ -199,15 +199,15 @@ class ldap {
 
 	}
 
-	public function get_records($base_dn, $filter, $attributes = array(),
-	$attribute_types_only = 0, $max_result_count = 0, $time_limit = 0,
+	public function getRecords($baseDN, $filter, $attributes = array(),
+	$attributeTypesOnly = 0, $maxResultCount = 0, $timeLimit = 0,
 	$deref = LDAP_DEREF_NEVER) {
 
-		$result_set = @ldap_search($this->connection, $base_dn, $filter,
-		$attributes, $attribute_types_only, $max_result_count,
-		$time_limit, $deref);
+		$resultSet = @ldap_search($this->connection, $baseDN, $filter,
+		$attributes, $attributeTypesOnly, $maxResultCount,
+		$timeLimit, $deref);
 
-		if($result_set === FALSE && self::$debug) {
+		if($resultSet === FALSE && self::$debug) {
 
 			debug_print_backtrace();
 
@@ -217,13 +217,13 @@ class ldap {
 			return ldap_errno($this->connection);
 
 		}
-		elseif($result_set === FALSE) {
+		elseif($resultSet === FALSE) {
 
 			return ldap_errno($this->connection);
 
 		}
 
-		$records = @ldap_get_entries($this->connection, $result_set);
+		$records = @ldap_get_entries($this->connection, $resultSet);
 
 		if($records === FALSE && self::$debug) {
 
@@ -243,7 +243,7 @@ class ldap {
 
 	}
 
-	public function modify_record($dn, $data) {
+	public function modifyRecord($dn, $data) {
 
 		$outcome = ldap_modify($this->connection, $dn, $data);
 		if(!$outcome && self::$debug) {
@@ -265,7 +265,7 @@ class ldap {
 
 	}
 
-	public function set_option($option, $value) {
+	public function setOption($option, $value) {
 
 		$outcome = ldap_set_option($this->connection, $option, $value);
 		if(!$outcome && self::$debug) {
@@ -304,7 +304,7 @@ class ldap {
 
 	}
 
-	public function toggle_debugging() {
+	public function toggleDebugging() {
 
 		if(!self::$debug) {
 
@@ -319,7 +319,7 @@ class ldap {
 
 	}
 
-	public function print_debugging_status() {
+	public function printDebuggingStatus() {
 
 		if(self::$debug) {
 
@@ -334,7 +334,7 @@ class ldap {
 
 	}
 
-	public function is_debugging_enabled() {
+	public function isDebuggingEnabled() {
 
 		if(self::$debug) {
 
@@ -348,7 +348,7 @@ class ldap {
 		}
 
 	}
-	public function turn_on_debugging() {
+	public function turnOnDebugging() {
 
 		if(!self::$debug) {
 
@@ -365,7 +365,7 @@ class ldap {
 
 	}
 
-	public function turn_off_debugging() {
+	public function turnOffDebugging() {
 
 		if(!self::$debug) {
 

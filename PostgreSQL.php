@@ -38,14 +38,14 @@
 *
 */
 
-class postgresql {
+class PostgreSQL {
 
 	private $link;
-	private $query_names = array();
+	private $queryNames = array();
 
-	public function __construct($connection_string) {
+	public function __construct($connectionString) {
 
-		$this->link = pg_connect($connection_string);
+		$this->link = pg_connect($connectionString);
 
 		if(!$this->link) {
 
@@ -62,17 +62,17 @@ class postgresql {
 
 	}
 
-	public function execute($query, $query_name, $parameters = array()) {
+	public function execute($query, $queryName, $parameters = array()) {
 
 		$results = array();
 
-		if(!(isset($this->query_names[$query_name]) ||
-		array_key_exists($query_name, $this->query_names))) {
+		if(!(isset($this->queryNames[$queryName]) ||
+		array_key_exists($queryName, $this->queryNames))) {
 
 			if(!pg_connection_busy($this->link)) {
 
-				$outcome = pg_send_prepare($this->link, $query_name, $query);
-				$this->query_names[$query_name] = $query_name;
+				$outcome = pg_send_prepare($this->link, $queryName, $query);
+				$this->queryNames[$queryName] = $queryName;
 				$result = pg_get_result($this->link);
 
 			}
@@ -93,7 +93,7 @@ class postgresql {
 
 		if(!pg_connection_busy($this->link)) {
 
-			$outcome = pg_send_execute($this->link, $query_name, $parameters);
+			$outcome = pg_send_execute($this->link, $queryName, $parameters);
 
 			if(($error = pg_last_error($this->link)) || $outcome === FALSE) {
 
@@ -123,8 +123,8 @@ class postgresql {
 
 	}
 
-	public function fetch_page($query, $page_number, $parameters = NULL,
-	$elements_per_page = 10, $sort_by = "date_and_time") {
+	public function fetchPage($query, $pageNumber, $parameters = NULL,
+	$elementsPerPage = 10, $sortBy = "date_and_time") {
 
 		if($parameters === NULL) {
 
@@ -132,22 +132,22 @@ class postgresql {
 
 		}
 
-		array_push($parameters, $sort_by, $elements_per_page,
-		($page_number - 1) * $elements_per_page);
+		array_push($parameters, $sortBy, $elementsPerPage,
+		($pageNumber - 1) * $elementsPerPage);
 
-		$dollar_count = substr_count($query, "$");
-		$dollar_numbers = array();
+		$dollarCount = substr_count($query, "$");
+		$dollarNumbers = array();
 
-		for($i = $dollar_count, $j = 0; $j < 3; $i++, $j++) {
+		for($i = $dollarCount, $j = 0; $j < 3; $i++, $j++) {
 
-			array_push($dollar_numbers, $i + 1);
+			array_push($dollarNumbers, $i + 1);
 
 		}
 
-		$query_string = sprintf("%s ORDER BY $%d LIMIT $%d OFFSET $%d",
-		$query, $dollar_numbers[0], $dollar_numbers[1], $dollar_numbers[2]);
+		$queryString = sprintf("%s ORDER BY $%d LIMIT $%d OFFSET $%d",
+		$query, $dollarNumbers[0], $dollarNumbers[1], $dollarNumbers[2]);
 
-		$x = $this->execute($query_string, "fetch_page", $parameters);
+		$x = $this->execute($queryString, "fetchPage", $parameters);
 
 		return $x;
 

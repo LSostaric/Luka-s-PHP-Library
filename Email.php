@@ -38,7 +38,7 @@
 *
 */
 
-class email {
+class Email {
 
 	private $subject;
 	private $message;
@@ -99,31 +99,31 @@ class email {
 
 	}
 
-	public function set_subject($subject) {
+	public function setSubject($subject) {
 
 		$this->subject = $subject;
 
 	}
 
-	public function set_message($message) {
+	public function setMessage($message) {
 
 		$this->message = $message;
 
 	}
 
-	public function set_sender($sender) {
+	public function setSender($sender) {
 
 		$this->sender = $sender;
 
 	}
 
-	public function set_recipient($recipient) {
+	public function setRecipient($recipient) {
 
 		$this->recipient = $recipient;
 
 	}
 
-	public function set_headers($headers) {
+	public function setHeaders($headers) {
 
 		$this->headers = $headers;
 

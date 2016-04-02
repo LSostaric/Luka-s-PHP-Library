@@ -38,7 +38,7 @@
 *
 */
 
-function sanitize_string($string) {
+function sanitizeString($string) {
 
 	$searches = array('&quot;', '!', '@', '#', '$', '%', '^',
 	'&', '*', '(', ')', '+', '{', '}', '|', ':', '"',
@@ -50,13 +50,13 @@ function sanitize_string($string) {
 	'', '', '-', '-', '', '-', '-', '', '', '', '', '',
 	'-', '-', '-', '-');
 
-	$sanitized_string = str_replace($searches, $replacements, $string);
+	$sanitizedString = str_replace($searches, $replacements, $string);
 
-	return $sanitized_string;
+	return $sanitizedString;
 
 }
 
-function markdown_to_html($markdown) {
+function markdownToHTML($markdown) {
 
 	preg_match_all("/\((\d+)\)\[(.+)\]/", $markdown, $numbers);
 
@@ -71,8 +71,8 @@ function markdown_to_html($markdown) {
 
 	foreach($numbers[1] as $key => $number) {
 
-		$searchings[$key] = "/\[(.+)\]\(".$number."\)/";
-		$replacements[$key] = "<a href=\"".$numbers[2][$key]."\">$1</a>";
+		$searchings[$key] = "/\[(.+)\]\(" . $number . "\)/";
+		$replacements[$key] = "<a href=\"" . $numbers[2][$key] . "\">$1</a>";
 
 	}
 
@@ -88,48 +88,48 @@ function markdown_to_html($markdown) {
 
 }
 
-function decompose_file_path($path) {
+function decomposeFilePath($path) {
 
-	$last_dot = strrpos($path, ".");
-	$extension = substr($path, $last_dot + 1);
-	$last_slash = strrpos($path, "/");
-	$file_name = substr($path, $last_slash + 1, $last_dot - $last_slash - 1);
-	$directory = substr($path, 0, $last_slash + 1);
+	$lastDot = strrpos($path, ".");
+	$extension = substr($path, $lastDot + 1);
+	$lastSlash = strrpos($path, "/");
+	$fileName = substr($path, $lastSlash + 1, $lastDot - $lastSlash - 1);
+	$directory = substr($path, 0, $lastSlash + 1);
 
-	$result = array("extension" => $extension, "file_name" => $file_name,
+	$result = array("extension" => $extension, "fileName" => $fileName,
 	"directory" => $directory);
 
 	return $result;
 
 }
 
-function get_string_between($string, $start, $end, $trim=TRUE) {
+function getStringBetween($string, $start, $end, $trim=TRUE) {
 
 	$results = array();
 	$offset = strpos($string, $start);
-	$start_length = strlen($start);
-	$end_length = strlen($end);
+	$startLength = strlen($start);
+	$endLength = strlen($end);
 
 	while( $offset !== FALSE ) {
 
-		$start_index = strpos($string, $start, $offset);
-		$end_index = strpos($string, $end, $offset+$start_length);
+		$startIndex = strpos($string, $start, $offset);
+		$endIndex = strpos($string, $end, $offset+$startLength);
 
 		if($trim) {
 
-			$result = trim(substr($string, $start_index + $start_length,
-			$end_index-$start_index - $start_length));
+			$result = trim(substr($string, $startIndex + $startLength,
+			$endIndex-$startIndex - $startLength));
 
 		}
 		else {
 
-			$result = substr($string, $start_index + $start_length,
-			$end_index-$start_index - $start_length);
+			$result = substr($string, $startIndex + $startLength,
+			$endIndex-$startIndex - $startLength);
 
 		}
 
 		array_push($results, $result);
-		$offset = strpos($string, $start, $end_index + $end_length);
+		$offset = strpos($string, $start, $endIndex + $endLength);
 
 	}
 
@@ -143,7 +143,7 @@ function get_string_between($string, $start, $end, $trim=TRUE) {
 
 }
 
-function trim_array_of_strings(&$array) {
+function trimArrayOfStrings(&$array) {
 
 	if(!is_array($array)) {
 
@@ -163,7 +163,7 @@ function trim_array_of_strings(&$array) {
 
 }
 
-function perform_file_upload($field_name, $destination,
+function performFileUpload($fieldName, $destination,
 $debug = FALSE) {
 
 	if(ini_get("display_errors") === "1") {
@@ -172,26 +172,26 @@ $debug = FALSE) {
 
 	}
 
-	if(is_array($_FILES[$field_name]["name"])) {
+	if(is_array($_FILES[$fieldName]["name"])) {
 
-		for($i = 0; $i < count($_FILES[$field_name]["name"]); $i++) {
+		for($i = 0; $i < count($_FILES[$fieldName]["name"]); $i++) {
 
-			$temporary_name = $_FILES[$field_name]["tmp_name"][$i];
-			$name = $_FILES[$field_name]["name"][$i];
-			move_uploaded_file($temporary_name, "$destination/$name");
+			$temporaryName = $_FILES[$fieldName]["tmp_name"][$i];
+			$name = $_FILES[$fieldName]["name"][$i];
+			move_uploaded_file($temporaryName, "$destination/$name");
 
 		}
 
 	}
 	else {
 
-		$temporary_name = $_FILES[$field_name]["tmp_name"];
-		$name = $_FILES[$field_name]["name"];
-		move_uploaded_file($temporary_name, "$destination/$name");
+		$temporaryName = $_FILES[$fieldName]["tmp_name"];
+		$name = $_FILES[$fieldName]["name"];
+		move_uploaded_file($temporaryName, "$destination/$name");
 
 	}
 
-	$outcome = $_FILES[$field_name]["error"];
+	$outcome = $_FILES[$fieldName]["error"];
 
 	switch($outcome) {
 
@@ -373,17 +373,17 @@ function srvget($name) {
 
 }
 
-function get_string_after_substring($string, $substring) {
+function getStringAfterSubstring($string, $substring) {
 
-	$substring_position = strpos($string, $substring);
-	return substr($string, $substring_position + 1);
+	$substringPosition = strpos($string, $substring);
+	return substr($string, $substringPosition + 1);
 
 }
 
-function get_string_before_substring($string, $substring) {
+function getStringBeforeSubstring($string, $substring) {
 
-	$substring_position = strpos($string, $substring);
-	return substr($string, 0, $substring_position + 1);
+	$substringPosition = strpos($string, $substring);
+	return substr($string, 0, $substringPosition + 1);
 
 }
 
@@ -399,7 +399,7 @@ function replaceWithAsciiEquivalents($string) {
 
 }
 
-function execute_external_command($command, $arguments,
+function executeExternalCommand($command, $arguments,
 &$output = array()) {
 
 	array_unshift($arguments, $command);
@@ -411,38 +411,41 @@ function execute_external_command($command, $arguments,
 	}
 
 	$command = call_user_func_array("sprintf", $arguments);
-	$last_line = exec($command, $output, $status);
+	exec($command, $output, $status);
 	return $status;
 
 }
 
-function print_nested_list($collection) {
+function printHTMLNestedList($collection, $listStart = "<ul>",
+$listEnd = "</ul>", $elementStart = "<li>", $elementEnd = "</li>",
+$attrLeft = "lft", $attrRight = "rgt", $attrName = "name",
+$attrDepth = "depth") {
 
-	echo("<ul>");
+	echo($listStart);
 
 	foreach($collection as $key => $element) {
 
-		$difference = $element["rgt"] - $element["lft"];
+		$difference = $element[$attrRight] - $element[$attrLeft];
 
 		if($difference > 1) {
 
-			echo("<li>" . $element["name"]);
-			echo("<ul>");
+			echo($elementStart . $element[$attrName]);
+			echo($listStart);
 
 		}
 		else {
 
-			echo("<li>" . $element["name"] . "</li>");
+			echo($elementStart . $element[$attrName] . $elementEnd);
 
 		}
 
 		if((isset($collection[$key + 1]) &&
-		$collection[$key + 1]["depth"] < $element["depth"]) ||
+		$collection[$key + 1][$attrDepth] < $element[$attrDepth]) ||
 		!isset($collection[$key + 1])) {
 
-			for($i = 0; $i < $element["depth"]; $i++) {
+			for($i = 0; $i < $element[$attrDepth]; $i++) {
 
-				echo("</ul></li>");
+				echo($listEnd . $elementEnd);
 
 			}
 
@@ -450,40 +453,40 @@ function print_nested_list($collection) {
 
 	}
 
-	echo("</ul>");
+	echo($listEnd);
 
 }
 
-function generate_pages($number_of_records,
-$records_per_page, $html_container = "a", $prefix = "page-",
-$name = "page", $url_base = "/", $appendix = "",
-$selected_class_name = "selected") {
+function generatePages($numberOfRecords,
+$recordsPerPage, $htmlContainer = "a", $prefix = "page-",
+$name = "page", $urlBase = "/", $appendix = "",
+$selectedClassName = "selected") {
 
-	$number_of_pages = ceil($number_of_records / $records_per_page);
-	$pagination_string = "";
+	$numberOfPages = ceil($numberOfRecords / $recordsPerPage);
+	$paginationString = "";
 
-	if($html_container == "a") {
+	if($htmlContainer == "a") {
 
 		$href = "href=";
 
 	}
 
-	for($i = 1; $i <= $number_of_pages; $i++) {
+	for($i = 1; $i <= $numberOfPages; $i++) {
 
 		$class = NULL;
 
 		if(gget($name) == $i) {
 
-			$class = "class=$selected_class_name";
+			$class = "class=$selectedClassName";
 
 		}
 
-		$pagination_string.= "<$html_container $class $href\"$url_base" .
-		"$prefix$i$appendix\">$i</$html_container>";
+		$paginationString.= "<$htmlContainer $class $href\"$urlBase" .
+		"$prefix$i$appendix\">$i</$htmlContainer>";
 
 	}
 
-	echo($pagination_string);
+	echo($paginationString);
 
 }
 
