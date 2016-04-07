@@ -458,7 +458,8 @@ $attrDepth = "depth") {
 }
 
 function generatePages($numberOfRecords,
-$recordsPerPage, $htmlContainer = "a", $prefix = "page-",
+$recordsPerPage, $lcp = 5, $rcp = 5, $currentPage = NULL,
+$htmlContainer = "a", $prefix = "page-",
 $name = "page", $urlBase = "/", $appendix = "",
 $selectedClassName = "selected") {
 
@@ -471,17 +472,28 @@ $selectedClassName = "selected") {
 
 	}
 
-	for($i = 1; $i <= $numberOfPages; $i++) {
+	if($currentPage == NULL) {
+
+		$currentPage = gget($name);
+
+	}
+
+	$start = $currentPage - $lcp;
+	$start = ($start < 1) ? 1 : $start;
+	$end = $currentPage + $rcp;
+	$end = ($end > $numberOfPages) ? $numberOfPages : $end;
+
+	for($i = $start; $i <= $end; $i++) {
 
 		$class = NULL;
 
-		if(gget($name) == $i) {
+		if($currentPage == $i) {
 
 			$class = "class=$selectedClassName";
 
 		}
 
-		$paginationString.= "<$htmlContainer $class $href\"$urlBase" .
+		$paginationString .= "<$htmlContainer $class $href\"$urlBase" .
 		"$prefix$i$appendix\">$i</$htmlContainer>";
 
 	}

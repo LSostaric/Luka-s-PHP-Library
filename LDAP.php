@@ -44,6 +44,8 @@ class LDAP {
 	private $port;
 	private $connection;
 	private $constructorErrorCode = 0x00;
+	private $elementsPerPage = 20;
+	private $baseDN;
 	private static $debug = NULL;
 
 	public function __construct($host, $dn = NULL,
@@ -243,6 +245,32 @@ class LDAP {
 
 	}
 
+	public function fetchPage($pageNumber, $filter,
+	$attributes = array(), $attrsOnly = 0, $timeLimit = 0,
+	$deref = LDAP_DEREF_NEVER) {
+
+		$records = $this->getRecords($this->baseDN, $filter,
+		$attributes, $attrsOnly, $this->elementsPerPage * $pageNumber,
+		$timeLimit, $deref);
+
+		$totalCount = $records["count"];
+		$offset = ($pageNumber - 1) * $this->elementsPerPage;
+
+		if($offset + $this->elementsPerPage - 1 > $totalCount - 1) {
+
+			$length = NULL;
+
+		}
+		else {
+
+			$length = $this->elementsPerPage;
+
+		}
+
+		return array_slice($records, $offset, $length);
+
+	}
+
 	public function modifyRecord($dn, $data) {
 
 		$outcome = ldap_modify($this->connection, $dn, $data);
@@ -279,6 +307,27 @@ class LDAP {
 			return ldap_errno($this->connection);
 
 		}
+
+	}
+
+	public function setElementsPerPage($noe) {
+
+		$this->elementsPerPage = $noe;
+
+	}
+
+	public function setBaseDN($baseDN) {
+
+		$this->baseDN = $baseDN;
+
+	}
+
+	public function escape($value) {
+
+		$searches = array("\\", "\\0", "*", "(", ")");
+		$replacements = array("\\0x5c", "\\0x00", "\\0x2a", "\\0x28", "\\0x29");
+
+		return str_replace($searches, $replacements);
 
 	}
 
