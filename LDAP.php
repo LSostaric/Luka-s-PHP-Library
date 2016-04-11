@@ -49,7 +49,7 @@ class LDAP {
 	private static $debug = NULL;
 
 	public function __construct($host, $dn = NULL,
-	$password = NULL, $port = 389) {
+	$password = NULL, $port = 389, $startTLS = TRUE) {
 
 		if(self::$debug === NULL) {
 
@@ -69,6 +69,21 @@ class LDAP {
 			" LDAP server.");
 
 			exit();
+
+		}
+
+		if($startTLS) {
+
+			$result = @ldap_start_tls($this->connection);
+
+			if(!$result) {
+
+				debug_print_backtrace();
+
+				echo("<br/>Could not issue the STARTTLS command!");
+				exit();
+
+			}
 
 		}
 
