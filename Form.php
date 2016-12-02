@@ -1,5 +1,43 @@
 <?php
 
+/*
+*
+*       Copyright (C) 2010 Luka Sostaric. Luka's PHP Library is
+*       distributed under the terms of the GNU General Public
+*       License.
+*
+*       This file is part of Luka's PHP Library.
+*
+*       It is free software: You can redistribute and/or modify
+*       it under the terms of the GNU General Public License, as
+*       published by the Free Software Foundation, either version
+*       3 of the License, or (at your option) any later version.
+*
+*       It is distributed in the hope that it will be useful,
+*       but WITHOUT ANY WARRANTY; without even the implied warranty
+*       of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*       See the GNU General Public License for more details.
+*
+*       You should have received a copy of the GNU General Public
+*       License along with Luka's PHP Library. If not, see
+*       <http://www.gnu.org/licenses/>.
+*
+*       Software Information
+*       --------------------
+*       Software Name: Luka's PHP Library
+*       File Name: Form.php
+*       External Components Used: None
+*       Required Files: None
+*       License: GNU GPL
+*
+*       Author Information
+*       ------------------
+*       Full Name: Luka Sostaric
+*       E-mail: <luka@lukasostaric.com>
+*       Website: <http://lukasostaric.com>
+*
+*/
+
 class FormField {
 
   private $mandatory;
