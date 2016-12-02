@@ -163,6 +163,25 @@ function trimArrayOfStrings(&$array) {
 
 }
 
+function getRefererPath() {
+
+	$referer = srvget("HTTP_REFERER");
+
+	if(strpos($referer, "https://") !== FALSE) {
+
+		$referer = substr($referer, 8);
+
+	}
+	elseif(strpos($referer, "http://") !== FALSE) {
+
+		$referer = substr($referer, 7);
+
+	}
+
+	return "/" . getStringAfterSubstring($referer, "/");
+
+}
+
 function performFileUpload($fieldName, $destination,
 $debug = FALSE) {
 
@@ -402,16 +421,17 @@ function replaceWithAsciiEquivalents($string) {
 function executeExternalCommand($command, $arguments,
 &$output = array()) {
 
-	array_unshift($arguments, $command);
+	$count = count($arguments);
 
-	for($i = 1; $i < count($arguments); $i++) {
+	for($i = 0; $i < $count; $i++) {
 
 		$arguments[$i] = escapeshellarg($arguments[$i]);
 
 	}
 
-	$command = call_user_func_array("sprintf", $arguments);
+	$command = vsprintf($command, $arguments);
 	exec($command, $output, $status);
+
 	return $status;
 
 }
@@ -458,13 +478,15 @@ $attrDepth = "depth") {
 }
 
 function generatePages($numberOfRecords,
-$recordsPerPage, $lcp = 5, $rcp = 5, $currentPage = NULL,
-$htmlContainer = "a", $prefix = "page-",
-$name = "page", $urlBase = "/", $appendix = "",
-$selectedClassName = "selected") {
+$recordsPerPage, $currentPage = NULL, $prefix = "page-",
+$urlBase = "/", $selectedClassName = "selected",
+$lcp = 5, $rcp = 5, $htmlWrapperContainer="li",
+$htmlContainer = "a", $name = "page",
+$appendix = "") {
 
 	$numberOfPages = ceil($numberOfRecords / $recordsPerPage);
 	$paginationString = "";
+	$href = "";
 
 	if($htmlContainer == "a") {
 
@@ -489,16 +511,39 @@ $selectedClassName = "selected") {
 
 		if($currentPage == $i) {
 
-			$class = "class=$selectedClassName";
+			$class = 'class="' . $selectedClassName . '"';
 
 		}
 
-		$paginationString .= "<$htmlContainer $class $href\"$urlBase" .
-		"$prefix$i$appendix\">$i</$htmlContainer>";
+		$paginationString .= "<$htmlWrapperContainer $class>" .
+		"<$htmlContainer $href\"$urlBase" .
+		"$prefix$i$appendix\">$i</$htmlContainer>" .
+		"</$htmlWrapperContainer>";
 
 	}
 
 	echo($paginationString);
+
+}
+
+function removeSpaces($string, $replacement) {
+
+	$trim = trim($string);
+	$trim = preg_replace("/\s+/", $replacement, $trim);
+
+	return $trim;
+
+}
+
+function prepareStringForEmail($string, $replacement = ".",
+$charClasses = "[-@]") {
+
+	$string = removeSpaces($string, $replacement);
+
+	$string = preg_replace("/\\$replacement*($charClasses+)\\$replacement*/",
+	"$1", $string);
+
+	return strtolower(replaceWithAsciiEquivalents($string));
 
 }
 

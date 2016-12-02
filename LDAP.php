@@ -59,9 +59,9 @@ class LDAP {
 
 		$this->host = $host;
 		$this->port = $port;
-		$this->connection = @ldap_connect($this->host, $this->port);
+		$this->connection = ldap_connect($this->host, $this->port);
 
-		if(!$this->connection) {
+		if(!$this->connection && self::$debug) {
 
 			debug_print_backtrace();
 
@@ -71,23 +71,35 @@ class LDAP {
 			exit();
 
 		}
+		elseif(!$this->connection) {
+
+			$this->constructorErrorCode = ldap_errno($this->connection);
+
+		}
 
 		if($startTLS) {
 
-			$result = @ldap_start_tls($this->connection);
+			$result = ldap_start_tls($this->connection);
 
-			if(!$result) {
+			if(!$result && self::$debug) {
 
 				debug_print_backtrace();
 
-				echo("<br/>Could not issue the STARTTLS command!");
+				echo("<br/>Could not issue the STARTTLS command! " .
+				ldap_error($this->connection) . ".");
+
 				exit();
+
+			}
+			elseif(!$result) {
+
+				$this->constructorErrorCode = ldap_errno($this->connection);
 
 			}
 
 		}
 
-		$outcome = @ldap_bind($this->connection, $dn, $password);
+		$outcome = ldap_bind($this->connection, $dn, $password);
 
 		if(!$outcome && self::$debug) {
 
@@ -109,7 +121,7 @@ class LDAP {
 
 	public function bindAsAnotherUser($dn = NULL, $password = NULL) {
 
-		$outcome = @ldap_bind($this->connection, $dn, $password);
+		$outcome = ldap_bind($this->connection, $dn, $password);
 
 		if(!$outcome && self::$debug) {
 
@@ -128,7 +140,7 @@ class LDAP {
 
 	public function addRecord($dn, $data) {
 
-		$outcome = @ldap_add($this->connection, $dn, $data);
+		$outcome = ldap_add($this->connection, $dn, $data);
 		if(!$outcome && self::$debug) {
 
 			debug_print_backtrace();
@@ -152,7 +164,7 @@ class LDAP {
 
 	public function deleteRecord($dn) {
 
-		$outcome = @ldap_delete($this->connection, $dn);
+		$outcome = ldap_delete($this->connection, $dn);
 
 		if(!$outcome && self::$debug) {
 
@@ -189,10 +201,22 @@ class LDAP {
 
 	}
 
+	public function removeAttributeValuesFromRecords($filter, $avPairs) {
+
+		$records = $this->getRecords($this->baseDN, $filter);
+
+		for($i = 0; $i < $records["count"]; $i++) {
+
+			ldap_mod_del($this->connection, $records[$i]["dn"], $avPairs);
+
+		}
+
+	}
+
 	public function moveRecord($dn, $newRDN, $newParent,
 	$deleteOldRDN = TRUE) {
 
-		$outcome = @ldap_rename($dn, $newRDN, $newParent, $deleteOldRDN);
+		$outcome = ldap_rename($dn, $newRDN, $newParent, $deleteOldRDN);
 
 		if(!$outcome && self::$debug) {
 
@@ -240,7 +264,7 @@ class LDAP {
 
 		}
 
-		$records = @ldap_get_entries($this->connection, $resultSet);
+		$records = ldap_get_entries($this->connection, $resultSet);
 
 		if($records === FALSE && self::$debug) {
 
@@ -269,20 +293,28 @@ class LDAP {
 		$timeLimit, $deref);
 
 		$totalCount = $records["count"];
+		unset($records["count"]);
 		$offset = ($pageNumber - 1) * $this->elementsPerPage;
 
 		if($offset + $this->elementsPerPage - 1 > $totalCount - 1) {
 
-			$length = NULL;
+			return array_slice($records, $offset);
 
 		}
 		else {
 
-			$length = $this->elementsPerPage;
+			return array_slice($records, $offset, $this->elementsPerPage);
 
 		}
 
-		return array_slice($records, $offset, $length);
+	}
+
+	public function countFilterResults($filter) {
+
+		$resultIdentifier = ldap_search($this->connection,
+		$this->baseDN, $filter, array(), 1);
+
+		return ldap_count_entries($this->connection, $resultIdentifier);
 
 	}
 
@@ -331,6 +363,12 @@ class LDAP {
 
 	}
 
+	public function getElementsPerPage() {
+
+		return $this->elementsPerPage;
+
+	}
+
 	public function setBaseDN($baseDN) {
 
 		$this->baseDN = $baseDN;
@@ -348,7 +386,7 @@ class LDAP {
 
 	public function disconnect() {
 
-		$outcome = @ldap_close($this->connection);
+		$outcome = ldap_close($this->connection);
 
 		if(!$outcome && self::$debug) {
 
@@ -442,6 +480,21 @@ class LDAP {
 			self::$debug = FALSE;
 
 		}
+
+	}
+
+	public static function getSubtree($dn, $startLevel = 1) {
+
+		$components = ldap_explode_dn($dn, 0);
+		unset($components["count"]);
+
+		for($i = 0; $i < $startLevel; $i++) {
+
+			unset($components[$i]);
+
+		}
+
+		return implode(",", $components);
 
 	}
 
