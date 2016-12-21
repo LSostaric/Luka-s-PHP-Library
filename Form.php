@@ -194,7 +194,7 @@ class Form extends FormField {
 
   }
 
-  protected function regexValidator($expression, $value) {
+  protected function regexValidator($expression, $value, $formField) {
 
     $result = preg_match($expression, $value);
 
