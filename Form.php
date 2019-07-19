@@ -1,43 +1,5 @@
 <?php
 
-/*
-*
-*       Copyright (C) 2010 Luka Sostaric. Luka's PHP Library is
-*       distributed under the terms of the GNU General Public
-*       License.
-*
-*       This file is part of Luka's PHP Library.
-*
-*       It is free software: You can redistribute and/or modify
-*       it under the terms of the GNU General Public License, as
-*       published by the Free Software Foundation, either version
-*       3 of the License, or (at your option) any later version.
-*
-*       It is distributed in the hope that it will be useful,
-*       but WITHOUT ANY WARRANTY; without even the implied warranty
-*       of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-*       See the GNU General Public License for more details.
-*
-*       You should have received a copy of the GNU General Public
-*       License along with Luka's PHP Library. If not, see
-*       <http://www.gnu.org/licenses/>.
-*
-*       Software Information
-*       --------------------
-*       Software Name: Luka's PHP Library
-*       File Name: Form.php
-*       External Components Used: None
-*       Required Files: None
-*       License: GNU GPL
-*
-*       Author Information
-*       ------------------
-*       Full Name: Luka Sostaric
-*       E-mail: <luka@lukasostaric.com>
-*       Website: <http://lukasostaric.com>
-*
-*/
-
 class FormField {
 
   private $mandatory;
@@ -50,7 +12,7 @@ class FormField {
   private $errorMessage;
 
   protected function __construct($value, $mandatory,
-  $messageInvalid, $messageEmpty, $validator, $arguments) {
+    $messageInvalid, $messageEmpty, $validator, $arguments) {
 
     $this->mandatory = $mandatory;
     $this->value = $value;
@@ -85,11 +47,12 @@ class Form extends FormField {
 
   protected $formFields = array();
   protected $valid = TRUE;
+  public $settings;
 
   final public function __set($name, $value) {
 
     error_log("Cannot set property called '$name' " .
-    "due to its access modifier!");
+      "due to its access modifier!");
 
   }
 
@@ -98,10 +61,10 @@ class Form extends FormField {
     foreach($validationSettings as $setting) {
 
       $this->formFields[] = new FormField((isset($data)) ?
-      $data[$setting["name"]] : pget($setting["name"]),
-      $setting["mandatory"], $setting["messageInvalid"],
-      $setting["messageEmpty"], $setting["validator"],
-      $setting["arguments"]);
+        $data[$setting["name"]] : pget($setting["name"]),
+        $setting["mandatory"], $setting["messageInvalid"],
+        $setting["messageEmpty"], $setting["validator"],
+        $setting["arguments"]);
 
     }
 
@@ -126,7 +89,7 @@ class Form extends FormField {
           $formField->arguments[] = $formField;
 
           $formField->valid = call_user_func_array(array($this,
-          $formField->validator), $formField->arguments);
+            $formField->validator), $formField->arguments);
 
         }
         else {
@@ -154,12 +117,19 @@ class Form extends FormField {
 
   }
 
+  public function emptyFieldValues() {
+    foreach($this->formFields as $formField) {
+      $formField->value = "";
+    }
+  }
+
   protected function uniqueLDAPEntry($ldap, $filter, $validator,
-  $arguments, $notUnique, $count, $value, $field) {
+    $arguments, $notUnique, $count, $value, $field) {
 
     if($validator != NULL) {
 
       $arguments[] = $value;
+      $arguments[] = $field;
       $result = call_user_func_array(array($this, $validator), $arguments);
 
       if(!$result) {
@@ -170,6 +140,8 @@ class Form extends FormField {
 
     }
 
+    $values = array();
+
     for($i = 0; $i < $count; $i++) {
 
       $values[] = $value;
@@ -179,7 +151,7 @@ class Form extends FormField {
     $filter = vsprintf($filter, $values);
     $count = $ldap->countFilterResults($filter);
 
-    if($count > 0) {
+    if($count > 0 && $notUnique != NULL) {
 
       $field->messageInvalid = $notUnique;
 
